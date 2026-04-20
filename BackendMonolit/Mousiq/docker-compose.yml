@@ -1,0 +1,52 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-mousiq-monolith
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana-mousiq-monolith
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+
+  postgres:
+    image: postgres:17
+    container_name: postgres-mousiq-monolith
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-database.sql:/docker-entrypoint-initdb.d/init.sql
+
+  monolith-app:
+    build: .
+    container_name: mousiq-monolith
+    ports:
+      - "8080:8080"
+    env_file: .env
+    depends_on:
+      - postgres
+
+volumes:
+  postgres-data:
+  prometheus-data:
+  grafana-data:

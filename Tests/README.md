@@ -1,0 +1,1 @@
+To run tests, update the `JMETER_PATH` variable in `run_performance_tests.py`

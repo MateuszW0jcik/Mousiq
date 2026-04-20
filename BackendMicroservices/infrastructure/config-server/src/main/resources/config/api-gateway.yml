@@ -1,0 +1,145 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      routes:
+        #            Swagger
+
+        - id: auth-user-service-swagger
+          uri: lb://AUTH-USER-SERVICE
+          predicates:
+            - Path=/api/auth/v3/api-docs
+          filters:
+            - RewritePath=/api/auth/v3/api-docs, /v3/api-docs
+
+        - id: product-service-swagger
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/api/products/v3/api-docs
+          filters:
+            - RewritePath=/api/products/v3/api-docs, /v3/api-docs
+
+        - id: cart-service-swagger
+          uri: lb://CART-SERVICE
+          predicates:
+            - Path=/api/cart/v3/api-docs
+          filters:
+            - RewritePath=/api/cart/v3/api-docs, /v3/api-docs
+
+        - id: order-service-swagger
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/api/orders/v3/api-docs
+          filters:
+            - RewritePath=/api/orders/v3/api-docs, /v3/api-docs
+
+        - id: payment-service-swagger
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/api/payments/v3/api-docs
+          filters:
+            - RewritePath=/api/payments/v3/api-docs, /v3/api-docs
+
+        #            Services
+
+        - id: auth-user-public
+          uri: lb://AUTH-USER-SERVICE
+          predicates:
+            - Path=/api/auth/**
+
+        - id: auth-user-protected
+          uri: lb://AUTH-USER-SERVICE
+          predicates:
+            - Path=/api/users/**,/api/addresses/**,/api/contacts/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: messages-public
+          uri: lb://AUTH-USER-SERVICE
+          predicates:
+            - Path=/api/messages/**
+            - Method=POST
+
+        - id: messages-protected
+          uri: lb://AUTH-USER-SERVICE
+          predicates:
+            - Path=/api/messages
+            - Method=GET
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: messages-protected
+          uri: lb://AUTH-USER-SERVICE
+          predicates:
+            - Path=/api/messages/{id}
+            - Method=DELETE
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: product-service-public
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/api/products/**,/api/brands/**,/api/shipping-methods/**
+            - Method=GET
+
+        - id: product-service-protected
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/api/products/**,/api/brands/**,/api/shipping-methods/**
+            - Method=POST,PUT,DELETE
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: cart-service
+          uri: lb://CART-SERVICE
+          predicates:
+            - Path=/api/cart/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: payment-service-public
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/api/payments/webhook/stripe
+
+        - id: payment-service-protected
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/api/payments/**,/api/payment-methods,/api/payment-methods/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: Auth User Service
+        url: /api/auth/v3/api-docs
+      - name: Product Service
+        url: /api/products/v3/api-docs
+      - name: Cart Service
+        url: /api/cart/v3/api-docs
+      - name: Order Service
+        url: /api/orders/v3/api-docs
+      - name: Payment Service
+        url: /api/payments/v3/api-docs

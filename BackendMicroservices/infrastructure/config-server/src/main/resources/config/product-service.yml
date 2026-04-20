@@ -1,0 +1,29 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: product-service
+
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/mousiq_product_db}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
+
+cloudinary:
+  url: ${CLOUDINARY_URL:cloudinary://url}
